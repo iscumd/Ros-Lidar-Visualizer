@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import pygame
 import rospy
 import math
@@ -43,7 +44,7 @@ def polar_to_cartesian(theta, rot):
 
 
 def text_to_screen(screen, text, x, y, size = 20, color = (000, 000, 000)):
-    font_type = './Roboto-Black.ttf'
+    font_type = pygame.font.match_font("roboto-black", "Arial", "sansserif")#'./Roboto-Black.ttf'
     try:
 
         text = str(text)
