@@ -4,6 +4,7 @@ import rospy
 import math
 import sensor_msgs.msg as sensors
 import geometry_msgs.msg as geometries
+import yeti_snowplow.msg as yeti_snowplow
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -58,7 +59,7 @@ def text_to_screen(screen, text, x, y, size = 20, color = (000, 000, 000)):
 
 
 def laserCallback(data):
-
+    global obstacles
     global lidar_max_range
     lidar_max_range = data.range_max
     start = data.angle_min
@@ -76,14 +77,27 @@ def laserCallback(data):
         final_y = translated_y
         pygame.draw.circle(screen, GREEN, (final_x, final_y), 3)
 
-    for i in range(0,len(obstacles)):
-        scaled_obs_x = int(pscale(obstacles[i][0],0,data.range_max,0,screen_width-50))
-        scaled_obs_y = int(pscale(obstacles[i][1],0,data.range_max,0,screen_height-50))
+    # for i in range(0,len(obstacles)):
+    #     scaled_obs_x = int(pscale(obstacles[i][0],0,data.range_max,0,screen_width-50))
+    #     scaled_obs_y = int(pscale(obstacles[i][1],0,data.range_max,0,screen_height-50))
+    #     translated_obs_x = scaled_obs_x + screen_width/2
+    #     translated_obs_y = screen_height - scaled_obs_y - 100
+    #     pygame.draw.circle(screen, WHITE, (translated_obs_x, translated_obs_y), 10)
+    #     pygame.draw.line(screen,PURPLE,(screen_width/2,screen_height-100),(translated_obs_x,translated_obs_y),4)
+    #     dist = distance(0, 0, obstacles[i][0], obstacles[i][1])
+    #     mid = midpoint([screen_width / 2, screen_height - 100], [translated_obs_x, translated_obs_y])
+    #     mid_x = mid[0] - 10
+    #     mid_y = mid[1]
+    #     text_to_screen(screen, str(dist)[:5] + 'm', mid_x, mid_y)
+    for obstacle in obstacles:
+        scaled_obs_x = int(pscale(obstacle.x,-10,20,0,screen_width-50))
+        scaled_obs_y = int(pscale(obstacle.y,-1,20,0,screen_height-50))
         translated_obs_x = scaled_obs_x + screen_width/2
         translated_obs_y = screen_height - scaled_obs_y - 100
         pygame.draw.circle(screen, WHITE, (translated_obs_x, translated_obs_y), 10)
+        text_to_screen(screen, "("+str(obstacle.x)+", "+str(obstacle.y)+")", translated_obs_x, translated_obs_y)
         pygame.draw.line(screen,PURPLE,(screen_width/2,screen_height-100),(translated_obs_x,translated_obs_y),4)
-        dist = distance(0, 0, obstacles[i][0], obstacles[i][1])
+        dist = distance(0, 0, obstacle.x, obstacle.y)
         mid = midpoint([screen_width / 2, screen_height - 100], [translated_obs_x, translated_obs_y])
         mid_x = mid[0] - 10
         mid_y = mid[1]
@@ -92,18 +106,28 @@ def laserCallback(data):
     refresh_screen()
 
 
-def obstacle1Callback(data):
-    obstacles[0][0] = data.x
-    obstacles[0][1] = data.y
+def obstacleCallback(data):
+    global obstacles
+    obstacles = data.obstacles#[]
+    # for obstacle in data.obstacles:#range(0,len(data.obstacles)):
+    #     new_obstacle = [0,0]
+    #     new_obstacle[0] = obstacle.x
+    #     new_obstacle[1] = obstacle.y
+    #     obstacles.append(new_obstacle)
+
+
+# def obstacle1Callback(data):
+#     obstacles[0][0] = data.x
+#     obstacles[0][1] = data.y
 
     #pygame.display.flip()
     #screen.fill(DEEP_RED)
     #pygame.draw.rect(screen, YELLOW, [screen_width / 2 - 25 / 2, 7 * screen_height / 8 + 10, 25, 50], 2)
 
 
-def obstacle2Callback(data):
-    obstacles[1][0] = data.x
-    obstacles[1][1] = data.y
+# def obstacle2Callback(data):
+#     obstacles[1][0] = data.x
+#     obstacles[1][1] = data.y
 
     #pygame.display.flip()
     #screen.fill(DEEP_RED)
@@ -140,10 +164,11 @@ def listener():
     refresh_screen()
 
 
-    rospy.Subscriber("scan", sensors.LaserScan, laserCallback)
-    rospy.Subscriber("scan_filtered", sensors.PointCloud, pointCloudCallback)
-    rospy.Subscriber("obstacle1", geometries.Pose2D, obstacle1Callback)
-    rospy.Subscriber("obstacle2", geometries.Pose2D, obstacle2Callback)
+    rospy.Subscriber("scan", sensors.LaserScan, laserCallback, queue_size=5)
+    # rospy.Subscriber("scan_filtered", sensors.PointCloud, pointCloudCallback)
+    # rospy.Subscriber("obstacle1", geometries.Pose2D, obstacle1Callback)
+    # rospy.Subscriber("obstacle2", geometries.Pose2D, obstacle2Callback)
+    rospy.Subscriber("/obstacle_detection/obstacles", yeti_snowplow.obstacles, obstacleCallback)
     rospy.spin()
 
 if __name__ == '__main__':
