@@ -97,7 +97,7 @@ def laserCallback(scan):
         final_x = ((point[0]*100) + robot_pose[0])*X_SCALE
         final_y = (robot_pose[1] - (point[1]*100))*Y_SCALE
         pygame.draw.circle(screen, GREEN, (int(final_x), int(final_y)), 3)
-    draw_yeti(robot_pose[0] * X_SCALE, robot_pose[1]*Y_SCALE, count*math.pi/20)
+    #draw_yeti(robot_pose[0] * X_SCALE, robot_pose[1]*Y_SCALE, count*math.pi/20)
 
     count = count + 1
     refresh_screen()
