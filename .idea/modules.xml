@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../localization_lidar_odom/.idea/localization_lidar_odom.iml" filepath="$PROJECT_DIR$/../localization_lidar_odom/.idea/localization_lidar_odom.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../localization-lidar-odom/.idea/localization_lidar_odom.iml" filepath="$PROJECT_DIR$/../localization-lidar-odom/.idea/localization_lidar_odom.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/visualizer.iml" filepath="$PROJECT_DIR$/.idea/visualizer.iml" />
     </modules>
   </component>

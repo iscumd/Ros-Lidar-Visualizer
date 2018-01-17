@@ -22,7 +22,7 @@ size = (screen_width, screen_height)
 screen = pygame.display.set_mode(size)
 
 obstacles = [[0, 0], [0, 0]]
-lidar_max_range = 0
+lidar_max_range = 20
 
 
 def midpoint(p1, p2):
