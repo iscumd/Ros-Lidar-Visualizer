@@ -4,7 +4,7 @@ import rospy
 import math
 import sensor_msgs.msg as sensors
 import geometry_msgs.msg as geometries
-#import yeti_snowplow.msg as yeti_snowplow
+import yeti_snowplow.msg as yeti_snowplow
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -34,6 +34,8 @@ count = 0.01
 origin_offset = [200,course_size[1] - 250]
 robot_pose[0] = robot_pose[0] + origin_offset[0]
 robot_pose[1] = robot_pose[1] + origin_offset[1]
+global map
+map = 0
 
 def draw_yeti(x,y,rot): #input scaled x and y
     outer_dim = [[0,0],[0.45*100*X_SCALE,0],[0.45*100*X_SCALE,0.75*100*Y_SCALE],[0,0.75*100*Y_SCALE]]
@@ -102,26 +104,27 @@ def laserCallback(scan):
 
     count = count + 1
     for obstacle in obstacles:
-        obs_x = (origin_offset[0] + obstacle.position.x * 100 ) * X_SCALE
-        obs_y = (origin_offset[1] - obstacle.position.y * 100) * Y_SCALE
+        obs_x = (origin_offset[0] + obstacle.x * 100 ) * X_SCALE
+        obs_y = (origin_offset[1] - obstacle.y * 100) * Y_SCALE
         pygame.draw.circle(screen, BLACK, (int(obs_x), int(obs_y)), 10)
 
-    for obstacle in map:
-        obs_x = (origin_offset[0] + obstacle.position.x * 100 ) * X_SCALE
-        obs_y = (origin_offset[1] - obstacle.position.y * 100) * Y_SCALE
-        pygame.draw.circle(screen, LIGHT_BLUE, (int(obs_x), int(obs_y)), 10)
+    #if map != 0:
+       #for obstacle in map:
+            #obs_x = (origin_offset[0] + obstacle.position.x * 100 ) * X_SCALE
+            #obs_y = (origin_offset[1] - obstacle.position.y * 100) * Y_SCALE
+            #pygame.draw.circle(screen, LIGHT_BLUE, (int(obs_x), int(obs_y)), 10)
 
     screen_pose = [int((origin_offset[0] + robot_pose[0]*100)*X_SCALE),int((origin_offset[1] - robot_pose[1]*100)*Y_SCALE)]
 
     pygame.draw.circle(screen, BLUE,screen_pose,10)
 
-    print screen_pose
+    #print screen_pose
 
     refresh_screen()
 
 def obstacleCallback(data):
     global obstacles
-    obstacles = data.poses
+    obstacles = data.obstacles
     #print "Num obstacles: " + str(len(obstacles))
     #for i in range(0,len(obstacles)):
     #    obs_x = (obstacles[i].position.x * 100) * X_SCALE
@@ -148,7 +151,7 @@ def main():
 
     rospy.Subscriber("scan", sensors.LaserScan, laserCallback)
     rospy.Subscriber("map", geometries.PoseArray, mapCallback)
-    rospy.Subscriber("obstacles", geometries.PoseArray, obstacleCallback)
+    rospy.Subscriber("obstacle_detector/obstacles", yeti_snowplow.obstacles, obstacleCallback)
     rospy.Subscriber("pose",geometries.Pose2D,poseCallback)
     rospy.spin()
 
